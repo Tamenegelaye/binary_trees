@@ -1,77 +1,47 @@
 #include "binary_trees.h"
 
 /**
- * binary_tree_is_leaf - Checks if a node is a leaf
- * @node: Pointer to the node to check
- *
- * Return: 1 if node is a leaf otherwise 0
+ * tree_stats - Computes some statistics about a binary tree.
+ * @tree: The binary tree.
+ * @n: The accumulated height of the current path in the tree.
+ * @leaves: A pointer to the tree's leaf count value.
+ * @height: A pointer to the tree's maximum height value.
  */
-int binary_tree_is_leaf(const binary_tree_t *node)
+void tree_stats(const binary_tree_t *tree, size_t n,
+	size_t *leaves, size_t *height)
 {
-	int leaf = 0;
-
-	if (node && !(node->left) && !(node->right))
-		leaf = 1;
-
-	return (leaf);
-}
-
-/**
- * binary_tree_is_parent_full - checks if a node is a parent
- *
- * @node: pointer to the node to check
- * Return: 1 if node is a parent, otherwise 0
- */
-int binary_tree_is_parent_full(const binary_tree_t *node)
-{
-	int parent = 0;
-
-	if (node && node->left && node->right)
-		parent = 1;
-
-	return (parent);
-}
-
-/**
- * height - Measures the height of a binary tree
- *
- * @tree: Pointer to the root node of the tree to measure the height
- *
- * Return: If tree is NULL return 0 otherwise Height
- */
-int height(const binary_tree_t *tree)
-{
-	int left = 0, right = 0;
-
-	if (tree)
+	if (tree != NULL)
 	{
-		left  = tree->left ? height(tree->left) + 1 : 0;
-		right = tree->right ? height(tree->right) + 1 : 0;
-		return ((left > right) ? left : right);
+		if ((tree->left == NULL) && (tree->right == NULL))
+		{
+			if (leaves != NULL)
+			{
+				(*leaves)++;
+			}
+			if ((height != NULL) && (n > *height))
+			{
+				*height = n;
+			}
+		}
+		else
+		{
+			tree_stats(tree->left, n + 1, leaves, height);
+			tree_stats(tree->right, n + 1, leaves, height);
+		}
 	}
-
-	return (0);
 }
 
 /**
- * binary_tree_is_perfect - Checks if a binary tree is perfect
- * @tree: Pointer to the root node of the tree to check
+ * binary_tree_is_perfect - Checks if a binary tree is perfect.
+ * @tree: The binary tree.
  *
- * Return: If tree is perfect return 1 otherwise return 0
+ * Return: 1 if the tree is perfect, otherwise 0.
  */
 int binary_tree_is_perfect(const binary_tree_t *tree)
 {
-	if (tree && height(tree->left) == height(tree->right))
-	{
-		if (height(tree->left) == -1)
-			return (1);
+	size_t leaves_count = 0;
+	size_t tree_height = 0;
 
-		if (binary_tree_is_leaf(tree->left) && binary_tree_is_leaf(tree->right))
-		return (1);
-
-		if (binary_tree_is_parent_full(tree))
-			return (binary_tree_is_perfect(tree->left) &&
-			binary_tree_is_perfect(tree->right));
-	}
-	return (0);
+	tree_stats(tree, 0, &leaves_count, &tree_height);
+	return ((int)leaves_count == (1 << tree_height) ? 1 : 0);
 }
